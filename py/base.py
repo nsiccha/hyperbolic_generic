@@ -210,7 +210,8 @@ class BasicExpr(sp.Expr, Printer):
     def _doit(cls, *args): return cls(*args).doit()
 
     _op_priority = 100.0
-    def __rshift__(self, other): return Rep(other)(self)
+    def __rshift__(self, other):
+        return Rep(other)(self)
     def __lshift__(self, other):
         if self.verbose:
             tprint(f'Doing replacement: {other}')
@@ -456,6 +457,14 @@ class MyExpand(Expr):
     def _post_new_up(self, expr, i):
         return expr.replace_at(i, self.args)
         return expr.func(*expr.args[:i], *self.args, *expr.args[i+1:])
+
+    def __rshift__(self, other):
+        return (self << other).replace_at(-2, tuple())
+    #     return Rep(other)(self)
+    # def __lshift__(self, other):
+    #     if self.verbose:
+    #         tprint(f'Doing replacement: {other}')
+    #     return Expand(self, Rep(other)(self))
 Expand = MyExpand
 
 class SpExpand(Expr):
@@ -2197,3 +2206,7 @@ class Ref(Expr):
     def __str__(self): return self.long_ref
 
 # hydrodynamic = Ref(hydro_brackets_u, 'hydrodynamic')
+class Notebook(Expr):
+    _mlatex = r'\href{{https://nbviewer.jupyter.org/github/nsiccha/hyperbolic_generic/blob/master/py/{args[0]}.ipynb}}{{{args[1]}}}'
+    @property
+    def l(self): return self.il
