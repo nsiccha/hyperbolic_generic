@@ -1,6 +1,7 @@
-from base import *
-import rie, hyp
-# from . import rie, hyp
+from .base import *
+# import rie, hyp
+from . import rie, hyp
+
 poisson_eq = Equation(
     'Poisson bracket of hydrodynamic type',
     Poisson(G, H),
@@ -50,18 +51,20 @@ jacobi_eqs = ZeroEqs(
             g[mu,i,l]*ASymm(
                 b[nu,j,k,l].d(u[m]),
                 m,l
-            ) -
+            ) +
             ASymm(
-                b[nu,i,k,l]*b[mu, l, j, m],
+                b[mu,i,j,l]*b[nu, l, k, m],
                 j, k
             )
         ),
         mu,nu
     ),
     ASymm(Protect(
-        g[mu,i,l]*b[nu,j,k,m].d(u[l]) +
-        b[nu,j,i,l]*b[mu,l,k,m] +
-        b[nu,j,k,l]*b[mu,i,l,m]),
+        g[mu,i,l]*b[nu,j,k,m].d(u[l]) -
+        # -b[nu,j,i,l]*b[mu,l,k,m] +
+        # b[nu,j,k,l]*b[mu,i,l,m]),
+        b[nu,i,j,l]*b[mu,l,k,m] -
+        b[nu,i,k,l]*b[mu,j,l,m]),
         Tuple(i,mu), Tuple(j, nu)
     ),
     Symm(Protect(
@@ -82,7 +85,7 @@ jacobi_eqs = ZeroEqs(
             ),
             i,j,k
         )),
-        Tuple(mu, n), Tuple(nu, l)
+        Tuple(mu, m), Tuple(nu, n)
     ),
 )
 
@@ -277,6 +280,10 @@ gg = Definition(
 )
 # b1, b2 = Symbol.symbols(r'\vmathbb{1} \vmathbb{2}')
 
+hydro_smooth_counterexample = Notebook(
+    'hydro_smooth_counterexample',
+    'accompanying notebook'
+)
 partitions_prop = Proposition(
     rf"""Consider a {gg.im} with nonempty, open set {O[m]} as in {Ok.ref}. Then
 
@@ -299,7 +306,7 @@ rf"""For the first point we will construct a counterexample that _is_ associated
     g[2], b[1,2], 0
 ).ibl} or if {Eq(
     -g[2](u),g[1](u),b[1,2](u),g[0](u[1]+u[2])
-).ibl} for all {uu}, see ADD LINK TO NOTEBOOK. We may stitch together the above families of Poisson brackets, as long as they are separated from each other, as for example as follows: {Relations(
+).ibl} for all {uu}, see {hydro_smooth_counterexample}. We may stitch together the above families of Poisson brackets, as long as they are separated from each other, as for example as follows: {Relations(
     g[1](u) == g[0](u[1]+u[2]),
     -g[2](u) == Cases({
         u[1]+u[2] < -eps: g[1](u),
@@ -328,9 +335,7 @@ For the second part we use the following factoid (see e.g. [Hogb2013], chapter 2
 > A square matrix $A$ has rank $k$ if and only if $A$ has a nonsingular $k\times k$ submatrix, and every $(k+1)\times (k+1)$ submatrix of $A$ is singular.
 
 As the determinant of a matrix with analytic coefficients is itself analytic,
-square submatrices of $g$ that are singular on some open set {Subset(O[m],tspace)} stay singular on the whole of the {tspace.im}. For the same reason, square submatrices of $A$ that are nonsingular on some open set {Subset(O[m],tspace)} can not be singular on any open set.
-
-""")
+square submatrices of $g$ that are singular on some open set {Subset(O[m],tspace)} stay singular on the whole of the {tspace.im}. For the same reason, square submatrices of $g$ that are nonsingular on some open set {Subset(O[m],tspace)} can not be singular on all of any open set. Given any {Contains(x, tspace)}, this includes _any_ open set {Subset(Prime(O),tspace)} containing $x$. Thus, every neighborhood of every point {Contains(x, tspace)} contains at least one point from {O[m]}, which is thus dense in {tspace.l}, i.e. its closure equals {tspace.l} (see e.g. [Bour1995], chapter 1, definition 10).""", rf"""""")
 
  #    g[1].d(u[2]), g[2].d(u[1]), b[1,2], 0
  # ).ibl} or if {Eq(

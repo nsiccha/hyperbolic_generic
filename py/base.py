@@ -1,4 +1,4 @@
-from IPython.display import display
+from IPython.display import display, Markdown
 import sympy as sp
 import numpy as np
 import itertools
@@ -796,6 +796,12 @@ class Eq(BinaryRelation):
         if self.verbose:
             print(f'bool({repr(self)})')
         return sp.Expr.__eq__(self.lhs, self.rhs)
+    @property
+    def trimmed(self):
+        for i, arg in enumerate(self.args[:-1]):
+            if self.args[i+1] is arg:
+                return self.replace_at(i, tuple()).trimmed
+        return self
 
 class Neq(BinaryRelation):
     op = r'\neq'
@@ -2207,6 +2213,7 @@ class Ref(Expr):
 
 # hydrodynamic = Ref(hydro_brackets_u, 'hydrodynamic')
 class Notebook(Expr):
-    _mlatex = r'\href{{https://nbviewer.jupyter.org/github/nsiccha/hyperbolic_generic/blob/master/py/{args[0]}.ipynb}}{{{args[1]}}}'
+    # _mlatex = r'\href{{https://nbviewer.jupyter.org/github/nsiccha/hyperbolic_generic/blob/master/py/{args[0]}.ipynb?flush_cache=true}}{{{args[1]}}}'
+    _mlatex = r'\href{{https://colab.research.google.com/github/nsiccha/hyperbolic_generic/blob/master/py/{args[0]}.ipynb?flush_cache=true}}{{{args[1]}}}'
     @property
     def l(self): return self.il

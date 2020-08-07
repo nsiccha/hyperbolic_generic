@@ -1,4 +1,4 @@
-from base import *
+from .base import *
 
 i, j = Symbol.symbols(r'i j')
 ih, jh = i.hat, j.hat

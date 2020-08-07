@@ -1,5 +1,5 @@
 # from .base import *
-from base import *
+from .base import *
 
 sig = Tensor('sigma', 1, 0)
 A = Tensor('A', 2, 1)
