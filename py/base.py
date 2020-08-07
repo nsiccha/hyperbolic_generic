@@ -515,6 +515,11 @@ class Union(Operator):
 class Intersection(Operator):
     down_precedence = Par.down_precedence
     op = r'\cap'
+
+class SetMinus(Operator):
+    down_precedence = Par.down_precedence
+    op = r'\setminus'
+
     # _mlatex2 = r'{args[0]} \cap {args[1]}'
     # def _mlatex(self, args):
     #     return rf'\cap_{{{args[1]}={args[2]}}}^{{{args[3]}}} {args[0]}'
