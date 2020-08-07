@@ -235,6 +235,7 @@ class BasicExpr(sp.Expr, Printer):
     def underbrace(self, other): return Underbrace(self, other)
     def __eq__(self, other): return Eq(self, other)
     def __gt__(self, other): return Greater(self, other)
+    def __lt__(self, other): return Less(self, other)
     def __ne__(self, other): return Neq(self, other)
     __hash__ = sp.Expr.__hash__
     # def __hash__(self): return hash((self.__class__, ) + self.args)
@@ -510,6 +511,13 @@ class Union(Operator):
     down_precedence = Par.down_precedence
     def _mlatex(self, args):
         return rf'\cup_{{{args[1]}={args[2]}}}^{{{args[3]}}} {args[0]}'
+
+class Intersection(Operator):
+    down_precedence = Par.down_precedence
+    op = r'\cap'
+    # _mlatex2 = r'{args[0]} \cap {args[1]}'
+    # def _mlatex(self, args):
+    #     return rf'\cap_{{{args[1]}={args[2]}}}^{{{args[3]}}} {args[0]}'
 
 class Closure(Operator):
     down_precedence = Par.down_precedence
@@ -2124,8 +2132,7 @@ class SuchThat(BinaryOperator):
     op = ':'
 
 class Fig(Expr):
-    def __call__(self, arg):
-        return self.func(arg.__name__, arg, *self.args)
+    def __call__(self, arg): return self.func(arg.__name__, arg, *self.args)
     @property
     def name(self): return self.args[0]
     @property
@@ -2135,7 +2142,14 @@ class Fig(Expr):
     @property
     def short_caption(self): return self.args[2]
     @property
-    def long_caption(self): return self.args[3] if len(self.args) > 2 else self.short_caption
+    def long_caption(self):
+        return self.args[3] if len(self.args) > 2 else self.short_caption
+    @property
+    def no_rows(self):
+        return int(self.args[4]) if len(self.args) > 3 else 1
+    @property
+    def no_cols(self):
+        return int(self.args[5]) if len(self.args) > 4 else 1
     @property
     def ref_label(self): return f'fig:{self.name}'
     @property
@@ -2143,9 +2157,14 @@ class Fig(Expr):
 
     def generate(self):
         import matplotlib.pyplot as plt
-        fig, ax = plt.subplots(1, 1, figsize=(16/2.5, 9/2.5))
-        ax.grid(True)
-        plt.tight_layout(pad=2, rect=(.05, 0, .95, 1))
+        fig, ax = plt.subplots(
+            self.no_rows, self.no_cols,
+            figsize=(16/2.5, 9/2.5*self.no_rows),
+            sharex=True, sharey=True
+        )
+        for _ax in getattr(ax, 'flat', [ax]):
+            _ax.grid(True)
+        plt.tight_layout(pad=2, rect=(0, 0, 1, .95))
         self.generator(fig, ax)
         fig.savefig(self.path)
 
@@ -2214,6 +2233,7 @@ class Ref(Expr):
 # hydrodynamic = Ref(hydro_brackets_u, 'hydrodynamic')
 class Notebook(Expr):
     # _mlatex = r'\href{{https://nbviewer.jupyter.org/github/nsiccha/hyperbolic_generic/blob/master/py/{args[0]}.ipynb?flush_cache=true}}{{{args[1]}}}'
-    _mlatex = r'\href{{https://colab.research.google.com/github/nsiccha/hyperbolic_generic/blob/master/py/{args[0]}.ipynb?flush_cache=true}}{{{args[1]}}}'
+    # _mlatex = r'\href{{https://colab.research.google.com/github/nsiccha/hyperbolic_generic/blob/master/nb/{args[0]}.ipynb?flush_cache=true}}{{`{args[0]}.ipynb`}}'
+    _mlatex = r'[`{args[0]}.ipynb`](https://colab.research.google.com/github/nsiccha/hyperbolic_generic/blob/master/nb/{args[0]}.ipynb?flush_cache=true)'
     @property
     def l(self): return self.il
